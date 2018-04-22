@@ -4,17 +4,17 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.garcia.felipe.redditapp.Details.Presenter.DetailPresenter;
 import com.garcia.felipe.redditapp.Details.Presenter.DetailPresenterImp;
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Helpers.Image.GlideImageLoader;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 import com.garcia.felipe.redditapp.R;
 
 import butterknife.BindView;
@@ -23,16 +23,25 @@ import butterknife.ButterKnife;
 
 public class DetailFragment extends Fragment implements DetailFragmentUI{
 
-    private RedditPost redditPost;
+    @BindView(R.id.titleDetails)
+    TextView title;
     private DetailPresenter detailPresenter;
-
-    @BindView(R.id.titleDetails) TextView titleDetails;
-    @BindView(R.id.categoryDetails)
-    TextView categoryDetails;
-    @BindView(R.id.dateDetails)
-    TextView dateDetails;
-    @BindView(R.id.descriptionDetails) TextView descriptionDetails;
+    @BindView(R.id.tagline)
+    TextView tagline;
+    @BindView(R.id.overview)
+    TextView overview;
+    @BindView(R.id.genres)
+    TextView genres;
+    @BindView(R.id.homepage)
+    TextView homepage;
+    @BindView(R.id.runtime)
+    TextView runtime;
+    @BindView(R.id.release)
+    TextView release;
+    @BindView(R.id.progressBarDetails)
+    ProgressBar progressBarDetails;
     @BindView(R.id.bannerImage) ImageView bannerImage;
+    private MultimediaItem dataObject;
 
     public DetailFragment() {
         this.detailPresenter = new DetailPresenterImp(this);
@@ -52,40 +61,54 @@ public class DetailFragment extends Fragment implements DetailFragmentUI{
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-        detailPresenter.onCreate(redditPost);
+        detailPresenter.onCreate(dataObject);
     }
 
     @Override
-    public void setRedditPost(RedditPost redditPost){
-        this.redditPost = redditPost;
+    public void setDataObject(MultimediaItem item) {
+        this.dataObject = item;
     }
 
     @Override
     public void setTitle(String title) {
-        titleDetails.setText(Html.fromHtml(title));
+        this.title.setText(Html.fromHtml(title));
     }
 
     @Override
-    public void setDescription(String description) {
-        if (description != null){
-            descriptionDetails.setText(Html.fromHtml(description));
-            descriptionDetails.setMovementMethod(LinkMovementMethod.getInstance());
-        }
+    public void setTagline(String string) {
+        tagline.setText(string);
     }
 
     @Override
-    public void setDate(String string) {
-        dateDetails.setText(string);
+    public void setOverview(String description) {
+        overview.setText(description);
     }
 
     @Override
-    public void setCategory(String string) {
-        categoryDetails.setText(string);
+    public void setReleasedDate(String string) {
+        release.setText(string);
     }
 
     @Override
-    public void setImage(String urlImage) {
-        Glide.with(this).load(urlImage).into(bannerImage);
+    public void setGenres(String string) {
+        genres.setText(string);
+    }
+
+    @Override
+    public void setRuntime(String string) {
+        runtime.setText(string);
+    }
+
+    @Override
+    public void setHomepage(String string) {
+        homepage.setText(string);
+    }
+
+
+    @Override
+    public void setImage(String imageURL) {
+        GlideImageLoader imageLoader = new GlideImageLoader(getContext());
+        imageLoader.load(bannerImage, imageURL, progressBarDetails);
     }
 
 }

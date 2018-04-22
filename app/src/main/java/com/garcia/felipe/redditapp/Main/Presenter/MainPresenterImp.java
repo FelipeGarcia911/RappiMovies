@@ -1,9 +1,9 @@
 package com.garcia.felipe.redditapp.Main.Presenter;
 
-import com.garcia.felipe.redditapp.Details.Events.DetailEvent;
+import com.garcia.felipe.redditapp.Details.Events.GetDetailsEvent;
+import com.garcia.felipe.redditapp.Helpers.Constants;
 import com.garcia.felipe.redditapp.Helpers.EventBus.GreenRobotEventBus;
 import com.garcia.felipe.redditapp.Main.UI.MainView;
-import com.garcia.felipe.redditapp.Models.RedditPost;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -18,28 +18,17 @@ public class MainPresenterImp implements MainPresenter {
     }
 
     @Subscribe
-    public void onItemDetail(DetailEvent event) {
+    public void onItemDetail(GetDetailsEvent event) {
         switch (event.getEventType()) {
-            case DetailEvent.ON_DETAIL_REQUEST:
-                RedditPost item = event.getItem();
-                view.navToDetailsFragment(item);
-                return;
-            default:
-                view.showMessage("Error showing details, please try again.");
-        }
-    }
-
-    @Override
-    public void onNavHomeList() {
-        if (view != null){
-            view.navToHomeListViewFragment();
+            case GetDetailsEvent.ON_SUCCESS:
+                view.navToDetailsFragment(event.getItem());
         }
     }
 
     @Override
     public void onCreate() {
         eventBus.register(this);
-        view.navToHomeListViewFragment();
+        onNavTopMovies();
     }
 
     @Override
@@ -51,5 +40,26 @@ public class MainPresenterImp implements MainPresenter {
     @Override
     public void onNavAbout() {
         view.navToAboutFragment();
+    }
+
+    @Override
+    public void onNavTopMovies() {
+        if (view != null) {
+            view.navToHomeListViewFragment(Constants.MOVIES, Constants.TOP_RATED);
+        }
+    }
+
+    @Override
+    public void onNavPopularMovies() {
+        if (view != null) {
+            view.navToHomeListViewFragment(Constants.MOVIES, Constants.POPULAR);
+        }
+    }
+
+    @Override
+    public void onNavUpcomingMovies() {
+        if (view != null) {
+            view.navToHomeListViewFragment(Constants.MOVIES, Constants.UPCOMING);
+        }
     }
 }

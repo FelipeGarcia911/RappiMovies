@@ -1,15 +1,24 @@
 package com.garcia.felipe.redditapp.Details.UI;
 
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 
 interface DetailFragmentUI {
-    void setRedditPost(RedditPost redditPost);
+
+    void setDataObject(MultimediaItem redditPost);
 
     void setTitle(String title);
-    void setDescription(String description);
+
+    void setTagline(String string);
+
+    void setOverview(String description);
+
     void setImage(String urlImage);
 
-    void setDate(String string);
+    void setReleasedDate(String string);
 
-    void setCategory(String category);
+    void setGenres(String category);
+
+    void setRuntime(String category);
+
+    void setHomepage(String category);
 }

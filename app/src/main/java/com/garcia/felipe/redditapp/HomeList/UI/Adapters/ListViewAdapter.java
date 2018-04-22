@@ -4,58 +4,84 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.garcia.felipe.redditapp.Helpers.Image.ImageLoader;
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 import com.garcia.felipe.redditapp.R;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ListViewAdapter extends RecyclerView.Adapter {
+public class ListViewAdapter extends RecyclerView.Adapter implements Filterable {
+
+
+    private final ArrayList<MultimediaItem> originalList;
+    private ValueFilter valueFilter;
+    private ArrayList<MultimediaItem> filteredItems;
 
     private final ImageLoader imageLoader;
-    private final List<RedditPost> redditPosts;
     private final OnItemClickListener onItemClickListener;
 
-    public ListViewAdapter(ArrayList<RedditPost> redditPosts, ImageLoader imageLoader, OnItemClickListener onItemClickListener) {
+    public ListViewAdapter(ArrayList<MultimediaItem> itemList, ImageLoader imageLoader, OnItemClickListener onItemClickListener) {
         this.imageLoader = imageLoader;
-        this.redditPosts = redditPosts;
+        this.filteredItems = itemList;
+        this.originalList = itemList;
         this.onItemClickListener = onItemClickListener;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.reddit_item_detail, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_detail, parent, false);
         return new ItemViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
-        RedditPost redditPost = redditPosts.get(position);
-        itemViewHolder.setItemData(redditPost, onItemClickListener);
+        MultimediaItem item = filteredItems.get(position);
+        itemViewHolder.setItemData(item, onItemClickListener);
     }
 
     @Override
     public int getItemCount() {
-        return redditPosts.size();
+        return filteredItems.size();
+    }
+
+    public void add(MultimediaItem item) {
+        filteredItems.add(item);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (valueFilter == null) {
+            valueFilter = new ValueFilter();
+        }
+        return valueFilter;
+    }
+
+    public void onCloseSearch() {
+        filteredItems = originalList;
+        notifyDataSetChanged();
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder implements ListViewAdapterView {
 
-        private final View view;
+        @BindView(R.id.overview)
+        TextView overview;
         @BindView(R.id.title) TextView title;
-        @BindView(R.id.shortDescription) TextView shortDescription;
-        @BindView(R.id.category)
-        TextView category;
-        @BindView(R.id.thumbnailImage) CircleImageView thumbnailImage;
+        @BindView(R.id.voteAverage)
+        TextView voteAverage;
+        @BindView(R.id.posterImage)
+        ImageView posterImage;
+        private View view;
         @BindView(R.id.progressBar)
         ProgressBar progressBar;
 
@@ -65,7 +91,7 @@ public class ListViewAdapter extends RecyclerView.Adapter {
             ButterKnife.bind(this, view);
         }
 
-        private void setClickListener(final RedditPost item, final OnItemClickListener onItemClickListener) {
+        private void setClickListener(final MultimediaItem item, final OnItemClickListener onItemClickListener) {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -88,26 +114,56 @@ public class ListViewAdapter extends RecyclerView.Adapter {
         }
 
         @Override
-        public void setDescription(String string) {
-            shortDescription.setText(string);
+        public void setOverview(String string) {
+            overview.setText(string);
         }
 
         @Override
         public void setImage(String string) {
-            imageLoader.load(thumbnailImage, string, progressBar);
+            imageLoader.load(posterImage, string, progressBar);
         }
 
         @Override
-        public void setCategory(String string) {
-            category.setText(string);
+        public void setVoteAverage(String string) {
+            voteAverage.setText(string);
         }
 
-        void setItemData(RedditPost redditPost, OnItemClickListener onItemClickListener) {
-//            setTitle(redditPost.getTitle());
-//            setCategory(redditPost.getCategory());
-//            setDescription(redditPost.getShortDescription());
-//            setImage(redditPost.getIconImageURL());
-//            setClickListener(redditPost, onItemClickListener);
+        void setItemData(MultimediaItem item, OnItemClickListener onItemClickListener) {
+            setTitle(item.getTitle());
+            setVoteAverage(item.getVoteAverage());
+            setOverview(item.getOverview());
+            setImage(item.getPosterPath());
+            setClickListener(item, onItemClickListener);
+        }
+    }
+
+    private class ValueFilter extends Filter {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults results = new FilterResults();
+
+            if (constraint != null && constraint.length() > 0) {
+                ArrayList<MultimediaItem> filterItems = new ArrayList<>();
+                for (int i = 0; i < filteredItems.size(); i++) {
+                    MultimediaItem currentItem = filteredItems.get(i);
+                    if (currentItem.valueFound(constraint.toString())) {
+                        filterItems.add(currentItem);
+                    }
+                }
+
+                filteredItems = filterItems;
+                results.values = filteredItems;
+                results.count = filteredItems.size();
+            } else {
+                results.values = false;
+                results.count = 0;
+            }
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            notifyDataSetChanged();
         }
     }
 }

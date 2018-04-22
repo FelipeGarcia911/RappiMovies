@@ -1,6 +1,6 @@
 package com.garcia.felipe.redditapp.Helpers.LocalStorage;
 
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -11,7 +11,6 @@ import java.util.List;
 public class ListLocalStorageHelper {
 
     private static final String LIST_KEY = "LIST_KEY";
-    private static final String LIST_TIME = "LIST_TIME";
 
     private Gson gson;
     private SharedPreferencesHelper preferencesHelper;
@@ -25,27 +24,26 @@ public class ListLocalStorageHelper {
         this.preferencesHelper = SharedPreferencesHelper.getInstance();
     }
 
-    public ArrayList<RedditPost> getList() {
-        ArrayList<RedditPost> list = new ArrayList<>();
-        String jsonString = preferencesHelper.read(LIST_KEY);
+    public ArrayList<MultimediaItem> getList(String key) {
+        ArrayList<MultimediaItem> list = new ArrayList<>();
+        String jsonString = preferencesHelper.read(key);
         if (jsonString == null || jsonString.isEmpty()) {
             return list;
         } else {
-            Type collectionType = new TypeToken<List<RedditPost>>() {
+            Type collectionType = new TypeToken<List<MultimediaItem>>() {
             }.getType();
             list = gson.fromJson(jsonString, collectionType);
             return list;
         }
     }
 
-    public void saveList(ArrayList<RedditPost> items) {
+    public void saveList(ArrayList<MultimediaItem> items, String key) {
         String gsonString = gson.toJson(items);
-        preferencesHelper.write(LIST_KEY, gsonString);
+        preferencesHelper.write(key, gsonString);
     }
 
-    public void deleteList() {
-        preferencesHelper.remove(LIST_KEY);
-        preferencesHelper.remove(LIST_TIME);
+    public void deleteList(String key) {
+        preferencesHelper.remove(key);
     }
 
 

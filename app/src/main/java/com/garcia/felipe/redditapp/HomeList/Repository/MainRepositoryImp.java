@@ -2,15 +2,18 @@ package com.garcia.felipe.redditapp.HomeList.Repository;
 
 import android.util.Log;
 
+import com.garcia.felipe.redditapp.Details.Events.GetDetailsEvent;
 import com.garcia.felipe.redditapp.Helpers.AsyncHttpClientHelper;
 import com.garcia.felipe.redditapp.Helpers.Constants;
 import com.garcia.felipe.redditapp.Helpers.EventBus.GreenRobotEventBus;
 import com.garcia.felipe.redditapp.Helpers.HttpConnectionHelper;
 import com.garcia.felipe.redditapp.Helpers.LocalStorage.ListLocalStorageHelper;
 import com.garcia.felipe.redditapp.HomeList.Events.DataEvent;
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
+import com.garcia.felipe.redditapp.Models.MultimediaItemDetails;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,14 +37,117 @@ public class MainRepositoryImp implements MainRepository {
     }
 
     @Override
-    public void getDataFromServer() {
-        String urlConnection = Constants.URL_SERVER;
-        asyncHttpClient.get(urlConnection, new AsyncHttpResponseHandler() {
+    public void getMultimediaByRanking(final String multimediaType, final String rankingType, final int page) {
+        String urlConnection = Constants.URL_SERVER + Constants.API_VERSION + "/" + multimediaType + "/" + rankingType;
+        RequestParams requestParams = new RequestParams();
+        requestParams.put("api_key", Constants.API_KEY_V3);
+        requestParams.put("page", page);
+        asyncHttpClient.get(urlConnection, requestParams, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                //JSONObject jsonObject = connectionHelper.stringBuilderJSONObject(responseBody);
-                //handleOnGetDataFromServerSuccess(jsonObject);
+                JSONObject jsonObject = connectionHelper.stringBuilderJSONObject(responseBody);
+                handleOnGetDataFromServerSuccess(jsonObject, multimediaType, rankingType, page);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.e("HTTP-Error", error.toString());
                 onGetDatFailure("Error connecting to the server, please try again later.");
+            }
+
+            private void handleOnGetDataFromServerSuccess(JSONObject jsonObject, String multimediaType, String rankingType, int page) {
+                try {
+                    JSONArray results = jsonObject.getJSONArray("results");
+                    ArrayList<MultimediaItem> multimediaItems = getMultimediaFromJSONArray(results);
+
+                    onGetDatSuccess(multimediaItems, multimediaType, rankingType, page);
+
+                }catch (JSONException e){
+                    Log.e("JSON-Error", e.toString());
+                    onGetDatFailure("Error parsing JSON data, please try again.");
+                }
+            }
+
+            private ArrayList<MultimediaItem> getMultimediaFromJSONArray(JSONArray jsonArray) throws JSONException {
+                ArrayList<MultimediaItem> arrayList = new ArrayList<>();
+                for (int i=0; i<jsonArray.length(); i++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    arrayList.add(createItemFromJSONObject(jsonObject));
+                }
+                return arrayList;
+            }
+
+            private MultimediaItem createItemFromJSONObject(JSONObject item) throws JSONException {
+                String voteCount = item.getString("vote_count");
+                long id = item.getLong("id");
+                String voteAverage = item.getString("vote_average");
+                String title = item.getString("title");
+                String popularity = item.getString("popularity");
+                String posterPath = item.getString("poster_path");
+
+                String originaLanguage = item.getString("original_language");
+                String originalTitle = item.getString("original_title");
+                String overview = item.getString("overview");
+
+                MultimediaItem multimediaItem = new MultimediaItem(id, title);
+                multimediaItem.setVoteCount(voteCount);
+                multimediaItem.setOverview(overview);
+                multimediaItem.setVoteAverage(voteAverage);
+                multimediaItem.setPopularity(popularity);
+                multimediaItem.setPosterPath(posterPath);
+                multimediaItem.setMultimediaType(multimediaType);
+                multimediaItem.setRankingType(rankingType);
+
+                return multimediaItem;
+            }
+
+            private void onGetDatSuccess(ArrayList<MultimediaItem> multimediaItems, String multimediaType, String rankingType, int page) {
+                DataEvent dataEvent = new DataEvent();
+                dataEvent.setEventType(DataEvent.ON_SUCCESS);
+                dataEvent.setList(multimediaItems);
+                dataEvent.setMultimediaType(multimediaType);
+                dataEvent.setPageRequest(page);
+                dataEvent.setRankingType(rankingType);
+                eventBus.post(dataEvent);
+            }
+
+            private void onGetDatFailure(String message) {
+                DataEvent dataEvent = new DataEvent();
+                dataEvent.setEventType(DataEvent.ON_FAILURE);
+                dataEvent.setMsgError(message);
+                eventBus.post(dataEvent);
+            }
+        });
+    }
+
+    @Override
+    public ArrayList<MultimediaItem> getMultimediaFromLS(String rankingType) {
+        ListLocalStorageHelper storageHelper = ListLocalStorageHelper.getInstance();
+        return storageHelper.getList(rankingType);
+    }
+
+    @Override
+    public void saveDataToLS(ArrayList<MultimediaItem> arrayList, String rankingType) {
+        ListLocalStorageHelper storageHelper = ListLocalStorageHelper.getInstance();
+        storageHelper.saveList(arrayList, rankingType);
+    }
+
+    @Override
+    public void deleteMultimediaFromLS(String rankingType) {
+        ListLocalStorageHelper storageHelper = ListLocalStorageHelper.getInstance();
+        storageHelper.deleteList(rankingType);
+    }
+
+    @Override
+    public void getMultimediaItemFromServer(final MultimediaItem item) {
+        String urlConnection = Constants.URL_SERVER + Constants.API_VERSION + "/" + item.getMultimediaType() + "/" + String.valueOf(item.getIdStr());
+        RequestParams requestParams = new RequestParams();
+        requestParams.put("api_key", Constants.API_KEY_V3);
+        asyncHttpClient.get(urlConnection, requestParams, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                JSONObject jsonObject = connectionHelper.stringBuilderJSONObject(responseBody);
+                handleOnGetDataFromServerSuccess(jsonObject);
             }
 
             @Override
@@ -52,70 +158,61 @@ public class MainRepositoryImp implements MainRepository {
 
             private void handleOnGetDataFromServerSuccess(JSONObject jsonObject) {
                 try {
-                    JSONObject data = jsonObject.getJSONObject("data");
-                    JSONArray children = data.getJSONArray("children");
-                    ArrayList<RedditPost> redditPosts = getRedditObjectFromJSONArray(children);
-                    onGetDatSuccess(redditPosts);
-                }catch (JSONException e){
+                    MultimediaItemDetails details = createItemFromJSONObject(jsonObject);
+                    item.setDetails(details);
+                    onGetDatSuccess(item);
+
+                } catch (JSONException e) {
                     Log.e("JSON-Error", e.toString());
                     onGetDatFailure("Error parsing JSON data, please try again.");
                 }
             }
 
-            private ArrayList<RedditPost> getRedditObjectFromJSONArray(JSONArray jsonArray) throws JSONException{
-                ArrayList<RedditPost> arrayList = new ArrayList<>();
-                for (int i=0; i<jsonArray.length(); i++){
+            private MultimediaItemDetails createItemFromJSONObject(JSONObject item) throws JSONException {
+                String budget = item.getString("budget");
+                String releaseDate = item.getString("release_date");
+                String revenue = item.getString("revenue");
+                String runtime = item.getString("runtime");
+                String tagline = item.getString("tagline");
+                String homepage = item.getString("homepage");
+                JSONArray genresJSON = item.getJSONArray("genres");
+
+                ArrayList<String> genres = getGenres(genresJSON);
+
+                MultimediaItemDetails details = new MultimediaItemDetails();
+                details.setBudget(budget);
+                details.setReleaseDate(releaseDate);
+                details.setRevenue(revenue);
+                details.setRuntime(runtime);
+                details.setTagline(tagline);
+                details.setGenres(genres);
+                details.setHompage(homepage);
+                return details;
+            }
+
+            private ArrayList<String> getGenres(JSONArray jsonArray) throws JSONException {
+                ArrayList<String> arrayList = new ArrayList<>();
+                for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    arrayList.add(createItemFromJSONObject(jsonObject));
+                    arrayList.add(jsonObject.getString("name"));
                 }
                 return arrayList;
             }
 
-            private RedditPost createItemFromJSONObject(JSONObject redditPost) throws JSONException{
-                JSONObject data = redditPost.getJSONObject("data");
+            private void onGetDatSuccess(MultimediaItem item) {
+                GetDetailsEvent event = new GetDetailsEvent();
+                event.setEventType(DataEvent.ON_SUCCESS);
+                event.setItem(item);
+                eventBus.post(event);
+            }
 
-                String title = data.getString("title");
-                String shortDescription = data.getString("public_description_html");
-                String longDescription = data.getString("description_html");
-                String iconImageURL = data.getString("icon_img");
-                String bannerImageURL = data.getString("banner_img");
-                long date = data.getLong("created");
-                String category = data.getString("advertiser_category");
-
-                RedditPost redditItem = new RedditPost(title, shortDescription, iconImageURL);
-                redditItem.setLongDescription(longDescription);
-                redditItem.setBannerImageURL(bannerImageURL);
-                redditItem.setDateFromStringUTC(date);
-                redditItem.setCategory(category);
-                return redditItem;
+            private void onGetDatFailure(String message) {
+                GetDetailsEvent event = new GetDetailsEvent();
+                event.setEventType(DataEvent.ON_FAILURE);
+                event.setMsgError(message);
+                eventBus.post(event);
             }
         });
     }
 
-
-    @Override
-    public ArrayList<RedditPost> getDataFromLocalStorage() {
-        ListLocalStorageHelper listLocalStorageHelper = ListLocalStorageHelper.getInstance();
-        return listLocalStorageHelper.getList();
-    }
-
-    @Override
-    public void saveDataToLocalStorage(ArrayList<RedditPost> items) {
-        ListLocalStorageHelper listLocalStorageHelper = ListLocalStorageHelper.getInstance();
-        listLocalStorageHelper.saveList(items);
-    }
-
-    private void onGetDatSuccess(ArrayList<RedditPost> arrayList){
-        DataEvent dataEvent = new DataEvent();
-        dataEvent.setEventType(DataEvent.ON_SUCCESS);
-        dataEvent.setList(arrayList);
-        eventBus.post(dataEvent);
-    }
-
-    private void onGetDatFailure(String message){
-        DataEvent dataEvent = new DataEvent();
-        dataEvent.setEventType(DataEvent.ON_FAILURE);
-        dataEvent.setMsgError(message);
-        eventBus.post(dataEvent);
-    }
 }

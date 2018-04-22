@@ -1,14 +1,18 @@
 package com.garcia.felipe.redditapp.HomeList.Repository;
 
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 
 import java.util.ArrayList;
 
 interface MainRepository {
 
-    void getDataFromServer();
+    void getMultimediaByRanking(String multimediaType, String rankingType, int i);
 
-    ArrayList<RedditPost> getDataFromLocalStorage();
+    ArrayList<MultimediaItem> getMultimediaFromLS(String rankingType);
 
-    void saveDataToLocalStorage(ArrayList<RedditPost> items);
+    void saveDataToLS(ArrayList<MultimediaItem> arrayList, String rankingType);
+
+    void getMultimediaItemFromServer(MultimediaItem item);
+
+    void deleteMultimediaFromLS(String rankingType);
 }

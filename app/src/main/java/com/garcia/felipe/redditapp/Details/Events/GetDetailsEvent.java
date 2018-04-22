@@ -1,14 +1,15 @@
 package com.garcia.felipe.redditapp.Details.Events;
 
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 
-public class DetailEvent {
+public class GetDetailsEvent {
 
-    public static final int ON_DETAIL_REQUEST = 0;
+    public static final int ON_SUCCESS = 1;
+    public static final int ON_FAILURE = 0;
 
     private int eventType;
     private String msgError;
-    private RedditPost item;
+    private MultimediaItem item;
 
     public int getEventType() {
         return eventType;
@@ -26,11 +27,11 @@ public class DetailEvent {
         this.msgError = msgError;
     }
 
-    public RedditPost getItem() {
+    public MultimediaItem getItem() {
         return item;
     }
 
-    public void setItem(RedditPost item) {
+    public void setItem(MultimediaItem item) {
         this.item = item;
     }
 }

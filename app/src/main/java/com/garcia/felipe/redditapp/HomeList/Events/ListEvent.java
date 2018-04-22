@@ -1,6 +1,6 @@
 package com.garcia.felipe.redditapp.HomeList.Events;
 
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 
 import java.util.ArrayList;
 
@@ -11,7 +11,8 @@ public class ListEvent {
 
     private int eventType;
     private String msgError;
-    private ArrayList<RedditPost> list;
+    private ArrayList<MultimediaItem> list;
+    private int page;
 
     public int getEventType() {
         return eventType;
@@ -29,11 +30,19 @@ public class ListEvent {
         this.msgError = msgError;
     }
 
-    public ArrayList<RedditPost> getList() {
+    public ArrayList<MultimediaItem> getList() {
         return list;
     }
 
-    public void setList(ArrayList<RedditPost> list) {
+    public void setList(ArrayList<MultimediaItem> list) {
         this.list = list;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
     }
 }

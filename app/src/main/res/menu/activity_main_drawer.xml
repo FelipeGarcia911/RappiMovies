@@ -5,9 +5,23 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_list"
+            android:id="@+id/nav_top_movies"
             android:icon="@drawable/ic_view_list_black_24px"
-            android:title="Current Post" />
+            android:title="Top Movies" />
+    </group>
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_popular_movies"
+            android:icon="@drawable/ic_view_list_black_24px"
+            android:title="Popular Movies" />
+    </group>
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_upcoming_movies"
+            android:icon="@drawable/ic_view_list_black_24px"
+            android:title="Upcoming Movies" />
     </group>
 
     <group android:checkableBehavior="single">

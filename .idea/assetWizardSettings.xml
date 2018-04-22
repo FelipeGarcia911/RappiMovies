@@ -46,7 +46,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="115" />
+                                                <entry key="scalingPercent" value="93" />
                                                 <entry key="trimmed" value="true" />
                                               </map>
                                             </option>
@@ -68,7 +68,7 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="foregroundImage" value="$USER_HOME$/Downloads/reddit_icon.png" />
+                                      <entry key="foregroundImage" value="$USER_HOME$/Downloads/rappi.png" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -85,11 +85,6 @@
                                 </PersistentState>
                               </value>
                             </entry>
-                          </map>
-                        </option>
-                        <option name="values">
-                          <map>
-                            <entry key="outputIconType" value="ACTIONBAR" />
                           </map>
                         </option>
                       </PersistentState>

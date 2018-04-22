@@ -4,12 +4,14 @@ import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Slide;
+import android.transition.TransitionInflater;
+import android.transition.TransitionSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -21,7 +23,7 @@ import com.garcia.felipe.redditapp.Helpers.LocalStorage.SharedPreferencesHelper;
 import com.garcia.felipe.redditapp.HomeList.UI.HomeListFragment;
 import com.garcia.felipe.redditapp.Main.Presenter.MainPresenter;
 import com.garcia.felipe.redditapp.Main.Presenter.MainPresenterImp;
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 import com.garcia.felipe.redditapp.R;
 
 public class MainActivity extends AppCompatActivity implements MainView, NavigationView.OnNavigationItemSelectedListener {
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+            overridePendingTransition(0, 0);
         }
     }
 
@@ -89,14 +92,20 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case R.id.nav_list:
-                presenter.onNavHomeList();
+            case R.id.nav_top_movies:
+                presenter.onNavTopMovies();
+                break;
+            case R.id.nav_popular_movies:
+                presenter.onNavPopularMovies();
+                break;
+            case R.id.nav_upcoming_movies:
+                presenter.onNavUpcomingMovies();
                 break;
             case R.id.nav_about:
                 presenter.onNavAbout();
                 break;
             default:
-                presenter.onNavHomeList();
+                presenter.onNavTopMovies();
                 break;
         }
 
@@ -106,8 +115,30 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
     }
 
     private void executeFragmentTransaction(final Fragment fragment, final String fragmentName) {
+
+        int MOVE_DEFAULT_TIME = 300;
+        int FADE_DEFAULT_TIME = 300;
+
+
+        // 1. Exit for Previous Fragment
+        Slide exitFade = new Slide();
+        exitFade.setDuration(FADE_DEFAULT_TIME);
+        currentFragment.setExitTransition(exitFade);
+
+        // 2. Shared Elements Transition
+        TransitionSet enterTransitionSet = new TransitionSet();
+        enterTransitionSet.addTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.move));
+        enterTransitionSet.setDuration(MOVE_DEFAULT_TIME);
+        enterTransitionSet.setStartDelay(FADE_DEFAULT_TIME);
+        fragment.setSharedElementEnterTransition(enterTransitionSet);
+
+        // 3. Enter Transition for New Fragment
+        Slide enterFade = new Slide();
+        enterFade.setStartDelay(MOVE_DEFAULT_TIME + FADE_DEFAULT_TIME);
+        enterFade.setDuration(FADE_DEFAULT_TIME);
+        fragment.setEnterTransition(enterFade);
+
         fragmentManager.beginTransaction()
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .replace(R.id.content_main, fragment, fragmentName)
                 .addToBackStack(fragmentName)
                 .commit();
@@ -115,9 +146,9 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
     }
 
     @Override
-    public void navToDetailsFragment(RedditPost item) {
+    public void navToDetailsFragment(MultimediaItem item) {
         DetailFragment detailFragment = new DetailFragment();
-        detailFragment.setRedditPost(item);
+        detailFragment.setDataObject(item);
         currentFragment = detailFragment;
         String fragmentName = String.valueOf("Post Details");
         if (!isFragmentVisible(fragmentName)) {
@@ -126,12 +157,11 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
     }
 
     @Override
-    public void navToHomeListViewFragment() {
-        currentFragment = new HomeListFragment();
+    public void navToHomeListViewFragment(String multimediaType, String rankingType) {
+        HomeListFragment homeListView = HomeListFragment.newInstance(multimediaType, rankingType);
+        currentFragment = homeListView;
         String fragmentName = String.valueOf("Reddit Post");
-        if (!isFragmentVisible(fragmentName)) {
-            executeFragmentTransaction(currentFragment, fragmentName);
-        }
+        executeFragmentTransaction(currentFragment, fragmentName);
     }
 
     private boolean isFragmentVisible(String fragmentName) {

@@ -1,11 +1,11 @@
 package com.garcia.felipe.redditapp.HomeList.Presenter;
 
-import com.garcia.felipe.redditapp.Details.Events.DetailEvent;
+import com.garcia.felipe.redditapp.Details.Events.GetDetailsEvent;
 import com.garcia.felipe.redditapp.Helpers.EventBus.GreenRobotEventBus;
 import com.garcia.felipe.redditapp.HomeList.Events.ListEvent;
 import com.garcia.felipe.redditapp.HomeList.Interactor.HomeListInteractorImp;
 import com.garcia.felipe.redditapp.HomeList.UI.HomeListView;
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -28,13 +28,22 @@ public class HomeListPresenterImp implements HomeListPresenter {
     public void onEventRefreshList(ListEvent event) {
         switch (event.getEventType()) {
             case ListEvent.ON_SUCCESS:
-                onSuccessRefreshList(event.getList());
+                onSuccessRefreshList(event.getList(), event.getPage());
                 return;
             case ListEvent.ON_FAILURE:
                 onFailureRefreshList(event.getMsgError());
                 return;
             default:
                 onFailureRefreshList("Unknown error, please try again.");
+        }
+    }
+
+    @Subscribe
+    public void onItemDetail(GetDetailsEvent event) {
+        view.hideProgressDialog();
+        switch (event.getEventType()) {
+            case GetDetailsEvent.ON_FAILURE:
+                view.showMessage(event.getMsgError());
         }
     }
 
@@ -45,10 +54,21 @@ public class HomeListPresenterImp implements HomeListPresenter {
         }
     }
 
-    private void onSuccessRefreshList(ArrayList<RedditPost> items) {
+    private void onSuccessRefreshList(ArrayList<MultimediaItem> items, int page) {
         if (view != null) {
+            if (items.size() > 0) {
+                if (page == HomeListInteractorImp.getInitialPage()) {
+                    view.setItemsToListView(items);
+                } else {
+                    for (int i = 0; i < items.size(); i++) {
+                        view.addItemToListView(items.get(i));
+                    }
+                    moveScrollPosition();
+                }
+            } else {
+                view.showMessage("No more data available.");
+            }
             view.hideSwipeProgressBar();
-            view.setItemsToListView(items);
         }
     }
 
@@ -63,10 +83,11 @@ public class HomeListPresenterImp implements HomeListPresenter {
 
 
     @Override
-    public void onItemClick(RedditPost object) {
-        DetailEvent event = new DetailEvent();
-        event.setItem(object);
-        eventBus.post(event);
+    public void onItemClick(MultimediaItem item) {
+        if (view != null) {
+            view.showProgressDialog("Loading data...");
+            interactor.onItemClick(item);
+        }
     }
 
     //----------------------------------------------------------------------------------------------
@@ -75,14 +96,15 @@ public class HomeListPresenterImp implements HomeListPresenter {
     public void onSwipeTop() {
         if (view != null) {
             view.showSwipeProgressBar();
+            interactor.refreshList(view.getMultimediaType(), view.getRankingType());
         }
-        interactor.refreshList();
     }
 
     @Override
     public void onSwipeBottom() {
         if (view != null) {
-            view.showMessage("Bottom reached!.");
+            view.showSwipeProgressBar();
+            interactor.getNextPage(view.getMultimediaType(), view.getRankingType());
         }
     }
 
@@ -91,7 +113,9 @@ public class HomeListPresenterImp implements HomeListPresenter {
 
     @Override
     public void initListView() {
-        interactor.onStartListView();
+        if (view != null) {
+            interactor.onStartListView(view.getRankingType());
+        }
     }
 
     //----------------------------------------------------------------------------------------------

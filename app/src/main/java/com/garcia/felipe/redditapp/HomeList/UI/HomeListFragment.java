@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,7 @@ import com.garcia.felipe.redditapp.Helpers.SimpleProgressDialogHelper;
 import com.garcia.felipe.redditapp.HomeList.Presenter.HomeListPresenterImp;
 import com.garcia.felipe.redditapp.HomeList.UI.Adapters.ListViewAdapter;
 import com.garcia.felipe.redditapp.HomeList.UI.Adapters.OnItemClickListener;
-import com.garcia.felipe.redditapp.Models.RedditPost;
+import com.garcia.felipe.redditapp.Models.MultimediaItem;
 import com.garcia.felipe.redditapp.R;
 import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout;
 import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayoutDirection;
@@ -26,16 +27,25 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class HomeListFragment extends Fragment implements HomeListView, OnItemClickListener {
 
+    private static final String MULTIMEDIA_TYPE = "MULTIMEDIA_TYPE";
+    private static final String RANKING_TYPE = "RANKING_TYPE";
+    @BindView(R.id.searchView)
+    SearchView searchView;
+    // TODO: Rename and change types of parameters
+    private String multimediaType;
+
     private final HomeListPresenterImp presenter;
     @BindView(R.id.swipe_refresh_layout) SwipyRefreshLayout swipeRefreshLayout;
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
-
+    private String rankingType;
+    private Unbinder unbinder;
     private ListViewAdapter listAdapter;
     private ImageLoader imageLoader;
     private SimpleProgressDialogHelper progressDialogHelper;
@@ -45,22 +55,35 @@ public class HomeListFragment extends Fragment implements HomeListView, OnItemCl
         presenter.onCreate();
     }
 
+    public static HomeListFragment newInstance(String multimediaType, String rankingType) {
+        HomeListFragment fragment = new HomeListFragment();
+        Bundle args = new Bundle();
+        args.putString(MULTIMEDIA_TYPE, multimediaType);
+        args.putString(RANKING_TYPE, rankingType);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_home_list, container, false);
+        if (getArguments() != null) {
+            multimediaType = getArguments().getString(MULTIMEDIA_TYPE);
+            rankingType = getArguments().getString(RANKING_TYPE);
+        }
+        return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
         initializeUI();
     }
 
     private void initializeUI() {
         initDialogs();
+        initSearchView();
         initImageLoader();
         initSwipeRefresh();
         initRecyclerView();
@@ -71,7 +94,7 @@ public class HomeListFragment extends Fragment implements HomeListView, OnItemCl
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        listAdapter = new ListViewAdapter(new ArrayList<RedditPost>(), imageLoader, this);
+        listAdapter = new ListViewAdapter(new ArrayList<MultimediaItem>(), imageLoader, this);
         recyclerView.setAdapter(listAdapter);
 
         presenter.initListView();
@@ -95,6 +118,30 @@ public class HomeListFragment extends Fragment implements HomeListView, OnItemCl
         swipeRefreshLayout.setColorSchemeColors(
                 getResources().getColor(R.color.colorAccent),
                 getResources().getColor(R.color.colorPrimary));
+    }
+
+    private void initSearchView() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                listAdapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                listAdapter.onCloseSearch();
+                return false;
+            }
+        });
+        searchView.setQueryHint("Ej. Felipe Castro");
+        searchView.clearFocus();
     }
 
     private void initDialogs() {
@@ -140,11 +187,16 @@ public class HomeListFragment extends Fragment implements HomeListView, OnItemCl
     }
 
     @Override
-    public void setItemsToListView(ArrayList<RedditPost> items) {
+    public void setItemsToListView(ArrayList<MultimediaItem> items) {
         listAdapter = new ListViewAdapter(items, imageLoader, this);
         if (recyclerView != null) {
             recyclerView.setAdapter(listAdapter);
         }
+    }
+
+    @Override
+    public void addItemToListView(MultimediaItem object) {
+        listAdapter.add(object);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -169,23 +221,34 @@ public class HomeListFragment extends Fragment implements HomeListView, OnItemCl
     }
 
     @Override
-    public void onClickListener(RedditPost object) {
+    public void onClickListener(MultimediaItem object) {
         presenter.onItemClick(object);
+    }
+
+    @Override
+    public String getMultimediaType() {
+        return multimediaType;
+    }
+
+    @Override
+    public String getRankingType() {
+        return rankingType;
     }
 
     @Override
     public void onDestroy() {
         presenter.onDestroy();
+        unbinder.unbind();
         super.onDestroy();
     }
 
     @Override
-    public void onClick(RedditPost item) {
+    public void onClick(MultimediaItem item) {
         presenter.onItemClick(item);
     }
 
     @Override
-    public void onLongClick(RedditPost item) {
+    public void onLongClick(MultimediaItem item) {
         presenter.onItemClick(item);
     }
 }
