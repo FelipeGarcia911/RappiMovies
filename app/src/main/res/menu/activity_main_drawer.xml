@@ -6,15 +6,15 @@
         <group android:checkableBehavior="single">
             <item
                 android:id="@+id/nav_top_movies"
-                android:icon="@drawable/ic_view_list_black_24px"
-                android:title="Top" />
+                android:icon="@drawable/ic_vertical_align_top_black_24px"
+                android:title="Top Rated" />
             <item
                 android:id="@+id/nav_popular_movies"
-                android:icon="@drawable/ic_view_list_black_24px"
+                android:icon="@drawable/ic_stars_black_24px"
                 android:title="Popular" />
             <item
                 android:id="@+id/nav_upcoming_movies"
-                android:icon="@drawable/ic_view_list_black_24px"
+                android:icon="@drawable/ic_flight_land_black_18px"
                 android:title="Upcoming" />
         </group>
     </item>

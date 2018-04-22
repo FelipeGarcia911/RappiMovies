@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:orientation="vertical"
     android:padding="5dp"
-    android:background="@color/white"
     tools:context=".Details.UI.DetailFragment">
 
     <TextView
@@ -39,10 +39,10 @@
             android:padding="5dp">
 
             <RelativeLayout
-                android:padding="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="10">
+                android:layout_weight="10"
+                android:padding="5dp">
 
                 <ImageView
                     android:id="@+id/bannerImage"
@@ -149,8 +149,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text=""
                         android:autoLink="web"
+                        android:text=""
                         android:textStyle="bold" />
                 </LinearLayout>
 
