@@ -2,34 +2,31 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
+    <item android:title="Movies">
+        <group android:checkableBehavior="single">
+            <item
+                android:id="@+id/nav_top_movies"
+                android:icon="@drawable/ic_view_list_black_24px"
+                android:title="Top" />
+            <item
+                android:id="@+id/nav_popular_movies"
+                android:icon="@drawable/ic_view_list_black_24px"
+                android:title="Popular" />
+            <item
+                android:id="@+id/nav_upcoming_movies"
+                android:icon="@drawable/ic_view_list_black_24px"
+                android:title="Upcoming" />
+        </group>
+    </item>
+    <item android:title="More Information">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_about"
+                    android:icon="@drawable/ic_info_black_24px"
+                    android:title="About us" />
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_top_movies"
-            android:icon="@drawable/ic_view_list_black_24px"
-            android:title="Top Movies" />
-    </group>
-
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_popular_movies"
-            android:icon="@drawable/ic_view_list_black_24px"
-            android:title="Popular Movies" />
-    </group>
-
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_upcoming_movies"
-            android:icon="@drawable/ic_view_list_black_24px"
-            android:title="Upcoming Movies" />
-    </group>
-
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_about"
-            android:icon="@drawable/ic_info_black_24px"
-            android:title="About" />
-
-    </group>
-
+            </group>
+        </menu>
+    </item>
 </menu>

@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_marginBottom="2dp"
     android:elevation="5dp"
-    android:background="#eeeeee"
     android:layout_height="150dp">
 
     <RelativeLayout

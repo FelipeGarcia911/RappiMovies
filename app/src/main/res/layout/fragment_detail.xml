@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="5dp"
+    android:background="@color/white"
     tools:context=".Details.UI.DetailFragment">
 
     <TextView
@@ -23,19 +24,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="TextView"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:textStyle="bold" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <LinearLayout
-            android:padding="5dp"
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="top"
+            android:orientation="vertical"
+            android:padding="5dp">
 
             <RelativeLayout
+                android:padding="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="10">
@@ -69,7 +73,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Genres" />
+                        android:text="Genres"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/genres"
@@ -91,7 +96,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Released" />
+                        android:text="Released"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/release"
@@ -114,7 +120,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Runtime:" />
+                        android:text="Runtime:"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/runtime"
@@ -134,7 +141,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Homepage" />
+                        android:text="Homepage"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/homepage"
@@ -142,6 +150,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text=""
+                        android:autoLink="web"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -151,7 +160,8 @@
                 android:id="@+id/overview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:autoLink="web" />
+                android:layout_marginTop="10dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         </LinearLayout>
     </ScrollView>

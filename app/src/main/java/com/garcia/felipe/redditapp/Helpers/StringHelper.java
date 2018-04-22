@@ -4,7 +4,7 @@ import android.text.TextUtils;
 
 public class StringHelper {
 
-    public boolean isValidString(String string) {
+    private boolean isValidString(String string) {
         return !TextUtils.isEmpty(string);
     }
 

@@ -21,17 +21,20 @@ public class DetailPresenterImp implements DetailPresenter {
     }
 
     private void setMultimediaDetails(MultimediaItem item) {
-        view.setTitle(item.getTitle());
-        view.setImage(item.getBannerImage());
-        view.setOverview(item.getOverview());
+        if (view != null) {
+            view.setTitle(item.getTitle());
+            view.setImage(item.getBannerImage());
+            view.setOverview(item.getOverview());
 
-        MultimediaItemDetails details = item.getDetails();
-        if (details != null) {
-            view.setReleasedDate(details.getReleaseDate());
-            view.setRuntime(details.getRuntime());
-            view.setHomepage(details.getHompage());
-            view.setGenres(details.getGenres().toString());
-            view.setTagline(details.getTagline());
+            MultimediaItemDetails details = item.getDetails();
+            if (details != null) {
+                view.setReleasedDate(details.getReleaseDate());
+                view.setRuntime(details.getRuntime());
+                view.setHomepage(details.getHompage());
+                view.setGenres(details.getGenres().toString());
+                view.setTagline(details.getTagline());
+            }
+            view.setFragmentNameInToolbar(item.getTitle());
         }
     }
 

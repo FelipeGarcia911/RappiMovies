@@ -144,9 +144,7 @@ public class MultimediaItem {
             return true;
         }
         if (details != null) {
-            if (stringHelper.containString(details.getTagline(), searchKey)) {
-                return true;
-            }
+            return stringHelper.containString(details.getTagline(), searchKey);
         }
         return false;
     }

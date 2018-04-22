@@ -21,4 +21,6 @@ interface DetailFragmentUI {
     void setRuntime(String category);
 
     void setHomepage(String category);
+
+    void setFragmentNameInToolbar(String fragmentName);
 }

@@ -1,6 +1,7 @@
 package com.garcia.felipe.redditapp.Main.UI;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -32,6 +33,9 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
     private MainPresenter presenter;
     private Fragment currentFragment;
 
+    private  static int MOVE_DEFAULT_TIME = 200;
+    private  static int FADE_DEFAULT_TIME = 200;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
 
         initializeSingletons();
         fragmentManager = getSupportFragmentManager();
@@ -72,24 +78,9 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         switch (id) {
             case R.id.nav_top_movies:
@@ -114,29 +105,32 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
         return true;
     }
 
-    private void executeFragmentTransaction(final Fragment fragment, final String fragmentName) {
-
-        int MOVE_DEFAULT_TIME = 300;
-        int FADE_DEFAULT_TIME = 300;
-
-
-        // 1. Exit for Previous Fragment
+    private Slide getExitAnimation(){
         Slide exitFade = new Slide();
         exitFade.setDuration(FADE_DEFAULT_TIME);
-        currentFragment.setExitTransition(exitFade);
+        return exitFade;
+    }
 
-        // 2. Shared Elements Transition
+    private Slide getEnterAnimation(){
+        Slide enterFade = new Slide();
+        enterFade.setStartDelay(MOVE_DEFAULT_TIME + FADE_DEFAULT_TIME);
+        enterFade.setDuration(FADE_DEFAULT_TIME);
+        return enterFade;
+    }
+
+    private TransitionSet getTransitionSet(){
         TransitionSet enterTransitionSet = new TransitionSet();
         enterTransitionSet.addTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.move));
         enterTransitionSet.setDuration(MOVE_DEFAULT_TIME);
         enterTransitionSet.setStartDelay(FADE_DEFAULT_TIME);
-        fragment.setSharedElementEnterTransition(enterTransitionSet);
+        return enterTransitionSet;
+    }
 
-        // 3. Enter Transition for New Fragment
-        Slide enterFade = new Slide();
-        enterFade.setStartDelay(MOVE_DEFAULT_TIME + FADE_DEFAULT_TIME);
-        enterFade.setDuration(FADE_DEFAULT_TIME);
-        fragment.setEnterTransition(enterFade);
+    private void executeFragmentTransaction(final Fragment fragment, final String fragmentName) {
+
+        currentFragment.setExitTransition(getExitAnimation());
+        fragment.setSharedElementEnterTransition(getTransitionSet());
+        fragment.setEnterTransition(getEnterAnimation());
 
         fragmentManager.beginTransaction()
                 .replace(R.id.content_main, fragment, fragmentName)
@@ -158,10 +152,11 @@ public class MainActivity extends AppCompatActivity implements MainView, Navigat
 
     @Override
     public void navToHomeListViewFragment(String multimediaType, String rankingType) {
-        HomeListFragment homeListView = HomeListFragment.newInstance(multimediaType, rankingType);
-        currentFragment = homeListView;
-        String fragmentName = String.valueOf("Reddit Post");
-        executeFragmentTransaction(currentFragment, fragmentName);
+        currentFragment = HomeListFragment.newInstance(multimediaType, rankingType);
+        String fragmentName = String.valueOf(rankingType);
+        if (!isFragmentVisible(fragmentName)) {
+            executeFragmentTransaction(currentFragment, fragmentName);
+        }
     }
 
     private boolean isFragmentVisible(String fragmentName) {

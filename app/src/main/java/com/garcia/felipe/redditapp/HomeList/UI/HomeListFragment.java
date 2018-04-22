@@ -87,6 +87,7 @@ public class HomeListFragment extends Fragment implements HomeListView, OnItemCl
         initImageLoader();
         initSwipeRefresh();
         initRecyclerView();
+        setFragmentNameInToolbar();
     }
 
     private void initRecyclerView() {
@@ -250,5 +251,9 @@ public class HomeListFragment extends Fragment implements HomeListView, OnItemCl
     @Override
     public void onLongClick(MultimediaItem item) {
         presenter.onItemClick(item);
+    }
+
+    private void setFragmentNameInToolbar() {
+        getActivity().setTitle(rankingType.toUpperCase());
     }
 }

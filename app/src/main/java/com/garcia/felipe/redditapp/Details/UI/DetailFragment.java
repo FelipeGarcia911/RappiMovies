@@ -25,7 +25,6 @@ public class DetailFragment extends Fragment implements DetailFragmentUI{
 
     @BindView(R.id.titleDetails)
     TextView title;
-    private DetailPresenter detailPresenter;
     @BindView(R.id.tagline)
     TextView tagline;
     @BindView(R.id.overview)
@@ -42,6 +41,7 @@ public class DetailFragment extends Fragment implements DetailFragmentUI{
     ProgressBar progressBarDetails;
     @BindView(R.id.bannerImage) ImageView bannerImage;
     private MultimediaItem dataObject;
+    private DetailPresenter detailPresenter;
 
     public DetailFragment() {
         this.detailPresenter = new DetailPresenterImp(this);
@@ -109,6 +109,11 @@ public class DetailFragment extends Fragment implements DetailFragmentUI{
     public void setImage(String imageURL) {
         GlideImageLoader imageLoader = new GlideImageLoader(getContext());
         imageLoader.load(bannerImage, imageURL, progressBarDetails);
+    }
+
+    @Override
+    public void setFragmentNameInToolbar(String fragmentName) {
+        getActivity().setTitle(fragmentName);
     }
 
 }
