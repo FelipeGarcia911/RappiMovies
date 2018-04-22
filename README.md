@@ -10,6 +10,7 @@ A continuacion se describira a grandes razgos como fue construida la aplicación
 *   Libreria EventBus para comuncacion entre bloques.
 *   Libreria ButterKnife para el manejo de los elemento graficos
 *   Libreria RecyclerView y Swipe para manejo de las listas.
+*   Implementacion de test con JUnit4.
 
 **DESCRIPCION DE LAS CAPAS**
 1\. UI: Es la capa encargada de obtener y entregar informacion al usuario, en esta capa se encuentran las clases tipo Activity y Fragment
